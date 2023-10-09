@@ -25,7 +25,7 @@ class DeleteEvent:
         self,
         timestamp: float,
         deleted_length: int,
-        deleted_str: str | None = None,
+        deleted_str: str | None,
     ) -> None:
         self.event_type = "delete"
         self.timestamp = timestamp
@@ -128,7 +128,7 @@ class MeasureTextEntryPerformance:
             )
         )
 
-    def add_delete(self, deleted_length: int, deleted_str: str | None):
+    def add_delete(self, deleted_length: int, deleted_str: str | None = None):
         now = time.time()
 
         self.events_of_current_phrase.append(
