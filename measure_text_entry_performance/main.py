@@ -1,5 +1,3 @@
-import json
-import os
 import time
 from typing import Literal
 
@@ -58,7 +56,7 @@ class PhraseAndEvents:
 
 
 class MeasureTextEntryPerformance:
-    def __init__(self, phrase_set: list[str], path_to_export_file: str) -> None:
+    def __init__(self, phrase_set: list[str]) -> None:
         self.phrase_set = phrase_set
 
         self.phrases_and_events: list[PhraseAndEvents] = []
@@ -67,9 +65,6 @@ class MeasureTextEntryPerformance:
         self.start_time_of_current_phrase: None | float = None
         self.end_time_of_current_phrase: None | float = None
         self.events_of_current_phrase: list[Event] = []
-
-        self.path_fo_export_file = path_to_export_file
-        os.makedirs(path_to_export_file, exist_ok=True)
 
     def add_new_input(self, input: str | None):
         """
@@ -145,8 +140,7 @@ class MeasureTextEntryPerformance:
     def get_current_phrase_count(self) -> int:
         return self.number_of_current_phrase
 
-    def export(self):
-        dict_list = [pe.to_dict() for pe in self.phrases_and_events]
+    def export(self) -> list[dict[str, Any]]:
+        dict_list = [pe.to_dict() for pe in self.list_of_phrase_and_events]
 
-        with open(f"{self.path_fo_export_file}/typing.json", "w") as f:
-            json.dump(dict_list, f, indent=4)
+        return dict_list
