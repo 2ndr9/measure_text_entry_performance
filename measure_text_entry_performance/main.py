@@ -25,16 +25,19 @@ class DeleteEvent:
         self,
         timestamp: float,
         deleted_length: int,
+        deleted_str: str | None,
     ) -> None:
         self.event_type = "delete"
         self.timestamp = timestamp
         self.deleted_length = deleted_length
+        self.deleted_str = deleted_str
 
     def to_dict(self):
         return {
             "event_type": self.event_type,
             "timestamp": self.timestamp,
             "deleted_length": self.deleted_length,
+            "deleted_str": self.deleted_str,
         }
 
 
@@ -125,18 +128,16 @@ class MeasureTextEntryPerformance:
             )
         )
 
-    def add_delete(self, deleted_length: int):
+    def add_delete(self, deleted_length: int, deleted_str: str | None):
         now = time.time()
 
         self.events_of_current_phrase.append(
             DeleteEvent(
                 timestamp=now,
                 deleted_length=deleted_length,
+                deleted_str=deleted_str,
             )
         )
-
-        self.end_time_of_current_phrase = now
-        print("input is occurred. end time of current phrase is updated")
 
     def end_phrase(self, entered_phrase: str):
         now = time.time()
