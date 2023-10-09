@@ -25,7 +25,7 @@ class DeleteEvent:
         self,
         timestamp: float,
         deleted_length: int,
-        deleted_str: str | None,
+        deleted_str: str | None = None,
     ) -> None:
         self.event_type = "delete"
         self.timestamp = timestamp
