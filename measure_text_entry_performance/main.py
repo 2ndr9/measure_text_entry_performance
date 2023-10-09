@@ -1,29 +1,58 @@
 import time
-from typing import Literal
+from typing import Any
 
 
-class Event:
+class AddEvent:
     def __init__(
         self,
-        eventType: Literal["add_new_input", "end_phrase", "delete"],
         timestamp: float,
-        added_input: str | None = None,
-        entered_phrase: str | None = None,
-        deleted_length: int | None = None,
+        added_input: str,
     ) -> None:
-        self.eventType = eventType
+        self.event_type = "add_new_input"
         self.timestamp = timestamp
         self.added_input = added_input
-        self.entered_phrase = entered_phrase
+
+    def to_dict(self):
+        return {
+            "event_type": self.event_type,
+            "timestamp": self.timestamp,
+            "added_input": self.added_input,
+        }
+
+
+class DeleteEvent:
+    def __init__(
+        self,
+        timestamp: float,
+        deleted_length: int,
+    ) -> None:
+        self.event_type = "delete"
+        self.timestamp = timestamp
         self.deleted_length = deleted_length
 
     def to_dict(self):
         return {
-            "eventType": self.eventType,
+            "event_type": self.event_type,
             "timestamp": self.timestamp,
-            "added_input": self.added_input,
-            "entered_phrase": self.entered_phrase,
             "deleted_length": self.deleted_length,
+        }
+
+
+class EndPhraseEvent:
+    def __init__(
+        self,
+        timestamp: float,
+        entered_phrase: str,
+    ) -> None:
+        self.event_type = "end_phrase"
+        self.timestamp = timestamp
+        self.entered_phrase = entered_phrase
+
+    def to_dict(self):
+        return {
+            "event_type": self.event_type,
+            "timestamp": self.timestamp,
+            "entered_phrase": self.entered_phrase,
         }
 
 
@@ -35,7 +64,7 @@ class PhraseAndEvents:
         start_time: float,
         end_time: float,
         entered_phrase: str,
-        events: list[Event],
+        events: list[AddEvent | DeleteEvent | EndPhraseEvent],
     ) -> None:
         self.phrase = phrase
         self.phrase_number = phrase_number
@@ -59,12 +88,14 @@ class MeasureTextEntryPerformance:
     def __init__(self, phrase_set: list[str]) -> None:
         self.phrase_set = phrase_set
 
-        self.phrases_and_events: list[PhraseAndEvents] = []
+        self.list_of_phrase_and_events: list[PhraseAndEvents] = []
 
         self.number_of_current_phrase = 0
         self.start_time_of_current_phrase: None | float = None
         self.end_time_of_current_phrase: None | float = None
-        self.events_of_current_phrase: list[Event] = []
+        self.events_of_current_phrase: list[
+            AddEvent | DeleteEvent | EndPhraseEvent
+        ] = []
 
     def add_new_input(self, input: str | None):
         """
@@ -88,10 +119,9 @@ class MeasureTextEntryPerformance:
             print("input is occurred. end time of current phrase is updated")
 
         self.events_of_current_phrase.append(
-            Event(
-                eventType="add_new_input",
+            AddEvent(
                 timestamp=now,
-                added_input=input,
+                added_input="" if input is None else input,
             )
         )
 
@@ -99,8 +129,7 @@ class MeasureTextEntryPerformance:
         now = time.time()
 
         self.events_of_current_phrase.append(
-            Event(
-                eventType="delete",
+            DeleteEvent(
                 timestamp=now,
                 deleted_length=deleted_length,
             )
@@ -113,15 +142,14 @@ class MeasureTextEntryPerformance:
         now = time.time()
 
         self.events_of_current_phrase.append(
-            Event(
-                eventType="end_phrase",
+            EndPhraseEvent(
                 timestamp=now,
                 entered_phrase=entered_phrase,
             )
         )
 
         if self.number_of_current_phrase + 1 <= len(self.phrase_set):
-            self.phrases_and_events.append(
+            self.list_of_phrase_and_events.append(
                 PhraseAndEvents(
                     phrase=self.phrase_set[self.number_of_current_phrase],
                     phrase_number=self.number_of_current_phrase,
